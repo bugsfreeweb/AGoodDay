@@ -42,8 +42,8 @@ A breathtakingly beautiful, fully interactive web calendar with real-time weathe
 ## API Keys (Already Included)
 Your keys are already embedded (thank you!):
 
-- OpenWeatherMap → 925a54f5c17bac334fbcc8214e99f06f
-- NewsAPI → ce62f852b2d3424a9ba85424274c63f6
+- OpenWeatherMap → (Your own API here)
+- NewsAPI → (Your own API here)
 
 These keys have generous free-tier limits. If you plan heavy usage, consider getting your own keys and replacing them in the script section.
 
