@@ -40,7 +40,7 @@ A breathtakingly beautiful, fully interactive web calendar with real-time weathe
 4. Click any date → enjoy the butterfly animation and detailed view
 
 ## API Keys (Already Included)
-Your keys are already embedded (thank you!):
+API keys are already embedded (thank you!):
 
 - OpenWeatherMap → (Your own API here)
 - NewsAPI → (Your own API here)
