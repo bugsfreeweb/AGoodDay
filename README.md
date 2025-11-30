@@ -38,7 +38,7 @@ A breathtakingly beautiful, fully interactive web calendar with real-time weathe
 3. Allow location access for accurate weather & local news
 4. Click any date → enjoy the butterfly animation and detailed view
 
-## API Keys (Already Included)
+## API Keys
 API keys are already embedded (thank you!):
 
 - OpenWeatherMap → (Your own API here)
