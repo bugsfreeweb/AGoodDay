@@ -16,7 +16,7 @@ A breathtakingly beautiful, fully interactive web calendar with real-time weathe
 - **Live Clock** – 12-hour format with AM/PM  
 - **Real-time Weather** – Location-based (falls back to Delhi if denied)  
 - **Top News Headline** – From your country, powered by NewsAPI  
-- **Fully Responsive** – Perfect on mobile, tablet & desktop  
+- **Fully Responsive** – Perfect on tablet & desktop (Mobile is not perfect for this UI)
 - **Pure HTML + CSS + Vanilla JS** – No frameworks, no build tools  
 
 ## Tech Stack
