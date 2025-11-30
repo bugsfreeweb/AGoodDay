@@ -1,6 +1,10 @@
-// Seasonal Wallpapers (24 high-quality)
+// Your API Keys (safe to use client-side for these services)
+const WEATHER_API_KEY = "925a54f5c17bac334fbcc8214e99f06f";
+const NEWS_API_KEY = "ce62f852b2d3424a9ba85424274c63f6";
+
+// Seasonal Backgrounds
 const seasonalNature = [
-  "https://images.pexels.com/photos/132037/pexels-photo-132037.jpeg?w=1920&q=80",
+"https://images.pexels.com/photos/132037/pexels-photo-132037.jpeg?w=1920&q=80",
   "https://images.pexels.com/photos/844297/pexels-photo-844297.jpeg?w=1920&q=80",
   "https://images.pexels.com/photos/3584428/pexels-photo-3584428.jpeg?w=1920&q=80",
   "https://images.pexels.com/photos/1461974/pexels-photo-1461974.jpeg?w=1920&q=80",
@@ -26,7 +30,6 @@ const seasonalNature = [
   "https://images.pexels.com/photos/268533/pexels-photo-268533.jpeg?w=1920&q=80",
   "https://images.pexels.com/photos/39811/pexels-photo-39811.jpeg?w=1920&q=80"
 ];
-
 function changeBackground() {
   const month = new Date().getMonth();
   const hour = new Date().getHours();
@@ -48,7 +51,7 @@ document.getElementById('themeToggle').onclick = () => {
   feather.replace();
 };
 
-// Clock
+// Live Clock
 function updateClock() {
   const now = new Date();
   document.getElementById('dayName').textContent = now.toLocaleDateString('en-US', {weekday:'long'});
@@ -59,11 +62,10 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// Calendar Logic
+// Calendar Rendering (unchanged logic)
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const monthSelect = document.getElementById('monthSelect');
 const yearInput = document.getElementById('yearInput');
-
 months.forEach((m, i) => {
   const opt = document.createElement('option');
   opt.value = i; opt.textContent = m;
@@ -92,7 +94,6 @@ function renderCalendar() {
     card.innerHTML = `<span>${new Date(currentYear, currentMonth, 0).getDate() - i}</span>`;
     grid.appendChild(card);
   }
-
   for (let d = 1; d <= daysInMonth; d++) {
     const card = document.createElement('div');
     card.className = 'day-card';
@@ -106,7 +107,6 @@ function renderCalendar() {
     card.onclick = (e) => butterflyToDetail(e, card, d, currentMonth, currentYear);
     grid.appendChild(card);
   }
-
   const total = grid.children.length;
   for (let i = 1; i <= 42 - total; i++) {
     const card = document.createElement('div');
@@ -116,6 +116,7 @@ function renderCalendar() {
   }
 }
 
+// Butterfly Animation + Open Detail
 function butterflyToDetail(event, card, day, month, year) {
   const rect = card.getBoundingClientRect();
   const clone = card.cloneNode(true);
@@ -134,47 +135,109 @@ function butterflyToDetail(event, card, day, month, year) {
   }, 2200);
 }
 
+let userCountry = "US"; // fallback
+
+// Get User Location for Weather + News
+function getLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(position => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      fetchWeather(lat, lon);
+      fetchNews("auto");
+    }, () => {
+      console.log("Location denied, using fallback");
+      fetchWeather(28.6139, 77.2090); // Delhi
+      fetchNews("in");
+    });
+  } else {
+    fetchWeather(28.6139, 77.2090);
+    fetchNews("in");
+  }
+}
+
+// Fetch Weather
+async function fetchWeather(lat, lon) {
+  try {
+    const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`);
+    const data = await res.json();
+    const temp = Math.round(data.main.temp);
+    const desc = data.weather[0].description.charAt(0).toUpperCase() + data.weather[0].description.slice(1);
+    const city = data.name;
+    document.getElementById("weather").innerHTML = `${temp}°C in ${city}<br><small>${desc}</small>`;
+    userCountry = data.sys.country.toLowerCase();
+  } catch (err) {
+    document.getElementById("weather").textContent = "Weather unavailable";
+  }
+}
+
+// Fetch Top News
+async function fetchNews(country = "us") {
+  try {
+    const url = `https://newsapi.org/v2/top-headlines?country=${country}&apiKey=${NEWS_API_KEY}&pageSize=1`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.articles && data.articles.length > 0) {
+      const title = data.articles[0].title.split(" - ")[0];
+      document.getElementById("news").innerHTML = title.length > 80 ? title.substring(0, 77) + "..." : title;
+    } else {
+      document.getElementById("news").textContent = "No news available";
+    }
+  } catch (err) {
+    document.getElementById("news").textContent = "News unavailable";
+  }
+}
+
+// Show Detail Card with Real Data
 function showDetail(day, month, year) {
   const date = new Date(year, month, day);
   const overlay = document.getElementById('detailOverlay');
+  
   document.getElementById('detailDate').textContent = date.toLocaleDateString('en-US', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
-  document.getElementById('detailTime').textContent = new Date().toLocaleTimeString();
+  document.getElementById('detailTime').textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+  // Reset & Load Fresh Data
+  document.getElementById("weather").textContent = "Loading...";
+  document.getElementById("news").textContent = "Loading...";
+  document.getElementById("holiday").textContent = "Regular day";
 
   overlay.style.display = 'flex';
   setTimeout(() => overlay.style.opacity = '1', 100);
+
+  // Fetch latest weather & news every time detail opens
+  getLocation();
 }
 
+// Close Overlay
 document.getElementById('closeBtn').onclick = () => {
   const overlay = document.getElementById('detailOverlay');
   overlay.style.opacity = '0';
   setTimeout(() => overlay.style.display = 'none', 1200);
 };
 
-// Navigation & Home Button - FIXED
+// Navigation Buttons
 document.getElementById('prevBtn').onclick = () => {
   currentMonth--;
   if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-  renderCalendar();
   monthSelect.value = currentMonth;
   yearInput.value = currentYear;
+  renderCalendar();
 };
-
 document.getElementById('nextBtn').onclick = () => {
   currentMonth++;
   if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-  renderCalendar();
   monthSelect.value = currentMonth;
   yearInput.value = currentYear;
+  renderCalendar();
 };
-
 document.getElementById('homeBtn').onclick = () => {
   currentMonth = today.getMonth();
   currentYear = today.getFullYear();
-  renderCalendar();
   monthSelect.value = currentMonth;
   yearInput.value = currentYear;
+  renderCalendar();
 };
 
-// Init
+// Initialize
 feather.replace();
 renderCalendar();
