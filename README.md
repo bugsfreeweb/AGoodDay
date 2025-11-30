@@ -1,10 +1,10 @@
-# A Good Day Calendar
+# A Good Day Calendar • Bugsfree Studio
 
-![A Good Day Calendar Preview](https://raw.githubusercontent.com/bugsfreeweb/AGoodDay/assets/preview.png)
+![A Good Day Calendar Preview](https://github.com/bugsfreeweb/AGoodDay/blob/main/assets/preview.png?raw=true)
 
-A breathtakingly beautiful, fully interactive web calendar with real-time weather, top news, live clock, seasonal nature wallpapers, rainbow “Today” card, and a magical butterfly flight animation when you tap a date.
+A breathtakingly beautiful, fully interactive web calendar with real-time weather, top news, live clock, seasonal nature wallpapers, a rainbow “Today” card, and a **magical butterfly flight animation** when you tap any date.
 
-**Live Demo** → https://bugsfreeweb.github.io/AGoodDay  
+**Live Demo** → https://bugsfreeweb.github.io/AGoodDay
 
 ## Features
 
@@ -12,26 +12,25 @@ A breathtakingly beautiful, fully interactive web calendar with real-time weathe
 - **Rainbow “Today” Card** – Animated rainbow glow with subtle rotation  
 - **Butterfly Flight Animation** – Tap any date → the card flies like a butterfly into the detail view  
 - **Seasonal 4K Backgrounds** – 25 hand-picked nature photos that change based on month & time of day  
-- **Dark / Light Theme Toggle** – Instant switch with moon/sun icon  
-- **Live Clock** – 12-hour format with AM/PM (top-left)  
+- **Dark / Light Theme Toggle** – Instant moon/sun switch  
+- **Live Clock** – 12-hour format with AM/PM  
 - **Real-time Weather** – Location-based (falls back to Delhi if denied)  
 - **Top News Headline** – From your country, powered by NewsAPI  
-- **Responsive** – Looks perfect on mobile, tablet, and desktop  
+- **Fully Responsive** – Perfect on mobile, tablet & desktop  
 - **Pure HTML + CSS + Vanilla JS** – No frameworks, no build tools  
 
 ## Tech Stack
 
-- HTML5  
-- CSS3 (Flexbox, Grid, CSS Variables, Backdrop-filter)  
+- HTML5 · CSS3 (Flexbox, Grid, CSS Variables, Backdrop-filter)  
 - Vanilla JavaScript (ES6+)  
-- Feather Icons  
-- OpenWeatherMap API  
-- NewsAPI.org  
+- [Feather Icons](https://feathericons.com)  
+- [OpenWeatherMap API](https://openweathermap.org/api)  
+- [NewsAPI.org](https://newsapi.org)  
 - allOrigins CORS proxy (fallback for news)  
 
 ## How to Use
 
-1. **Clone or Download** the repository  
+1. **Clone or download** the repository
    ```bash
    git clone https://github.com/bugsfreeweb/AGoodDay.git
 
