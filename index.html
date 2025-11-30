@@ -7,15 +7,13 @@
 <script src="https://unpkg.com/feather-icons"></script>
 <link rel="stylesheet" href="./css/styles.css">
 <link rel="icon" href="./assets/agoodday.png" type="image/png">
-<script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool@latest'></script>
+<!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool@latest'></script> -->
 	
 </head>
 <body data-theme="dark">
-
 <div class="theme-toggle" id="themeToggle">
   <i data-feather="moon" id="themeIcon"></i>
 </div>
-
 <div class="header">
   <div class="left-info">
     <div class="live-time"><i data-feather="clock"></i> <span id="liveTime">2:32:18 PM</span></div>
@@ -30,16 +28,12 @@
     <div class="date-label" id="dateLabel">November 2025</div>
   </div>
 </div>
-
 <div class="nav-btn nav-prev" id="prevBtn"><i data-feather="chevron-left"></i></div>
 <div class="nav-btn nav-next" id="nextBtn"><i data-feather="chevron-right"></i></div>
-
 <button class="home-btn" id="homeBtn">
   <i data-feather="home"></i> Today
 </button>
-
 <div class="calendar-grid" id="calendar"></div>
-
 <div id="detailOverlay">
   <div class="detail-card">
     <div class="close-btn" id="closeBtn"><i data-feather="x"></i></div>
@@ -47,7 +41,7 @@
     <div class="info-grid">
       <div class="info-item"><i data-feather="clock"></i> <div><strong>Time</strong><br><span id="detailTime">--:--</span></div></div>
       <div class="info-item"><i data-feather="cloud"></i> <div><strong>Weather</strong><br><span id="weather">Loading...</span></div></div>
-      <div class="info-item"><i data-feather="gift"></i> <div><strong>Special Day</strong><br><span id="holiday">Regular day</span></div></div>
+      <div class="info-item"><i data-feather="gift"></i> <div><strong>Special Day</strong><br><span id="holiday">Loading...</span></div></div>
       <div class="info-item"><i data-feather="zap"></i> <div><strong>Top News</strong><br><span id="news">Loading...</span></div></div>
     </div>
     <div class="detail-footer">

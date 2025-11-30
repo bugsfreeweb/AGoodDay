@@ -28,8 +28,6 @@
     transition: background 4s ease;
   }
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-
-  /* All your original beautiful styles - 100% unchanged */
   .theme-toggle { position: fixed; top: 20px; left: 20px; width: 60px; height: 60px; background: rgba(139,92,246,0.25); backdrop-filter: blur(16px); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 300; box-shadow: 0 12px 36px var(--shadow-dark); border: 3px solid var(--border-dark); transition: all 0.5s ease; }
   .theme-toggle:hover { transform: scale(1.2) rotate(20deg); background: var(--accent-dark); }
   .header { position: fixed; top: 0; left: 0; right: 0; padding: 1rem 1.2rem; display: flex; justify-content: space-between; align-items: center; z-index: 100; pointer-events: none; flex-wrap: wrap; gap: 12px; }
@@ -53,6 +51,7 @@
   .day-card:hover { transform: translateY(-20px) scale(1.15); box-shadow: 0 60px 130px rgba(139,92,246,0.9); }
   .day-card:hover::before { opacity: 0.6; }
   .day-card.today { background: linear-gradient(45deg, #8b5cf6, #ec4899, #06b6d4, #f59e0b, #10b981, #f72585); background-size: 600%; animation: rainbowDance 12s ease infinite; box-shadow: 0 0 100px rgba(139,92,246,0.9); }
+  .day-card.holiday { border-color: #10b981 !important; box-shadow: 0 0 30px rgba(16, 185, 129, 0.6); }
   @keyframes rainbowDance { 0%,100% { background-position: 0% 50%; transform: scale(1) rotate(0); } 50% { background-position: 100% 50%; transform: scale(1.08) rotate(3deg); } }
   @keyframes butterflyDream { 0% { transform: translateY(0) rotate(0) scale(1); opacity: 1; } 15% { transform: translateY(-40px) translateX(30px) rotate(15deg) scale(1.3); } 30% { transform: translateY(-120px) translateX(-40px) rotate(-25deg) scale(1.6); } 45% { transform: translateY(-80px) translateX(60px) rotate(20deg) scale(1.5); } 60% { transform: translateY(-160px) translateX(-30px) rotate(-15deg) scale(1.8); } 80% { transform: translateY(-40px) translateX(40px) rotate(10deg) scale(1.4); } 100% { transform: translateY(0) translateX(0) rotate(0) scale(12); opacity: 0; border-radius: 50%; } }
   .day-card.flying { animation: butterflyDream 2.2s cubic-bezier(0.25,0.8,0.25,1) forwards; z-index: 99999 !important; pointer-events: none; }
@@ -65,4 +64,8 @@
   .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.2rem, 4vw, 2rem); font-size: clamp(1.05rem, 3vw, 1.4rem); }
   .info-item { background: rgba(255,255,255,0.16); padding: clamp(1.4rem, 4vw, 2rem); border-radius: 28px; display: flex; align-items: center; gap: 18px; border: 2.5px solid var(--border-dark); }
   .detail-footer { text-align: center; padding: 2rem 0 1rem; border-top: 3px dashed var(--border-dark); font-size: clamp(0.95rem, 2.8vw, 1.15rem); color: var(--accent-glow); }
+  .news-link { color: var(--accent-dark); text-decoration: none; font-weight: 600; cursor: pointer; transition: color 0.3s; }
+  .news-link:hover { color: #ec4899; text-decoration: underline; }
+  .holiday-link { color: #10b981; text-decoration: none; font-weight: 600; cursor: pointer; transition: color 0.3s; }
+  .holiday-link:hover { color: #059669; text-decoration: underline; }
   @media (max-width: 480px) { .info-grid { grid-template-columns: 1fr; } .detail-card { padding: 2.5rem 2rem; } }

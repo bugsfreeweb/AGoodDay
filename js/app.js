@@ -1,8 +1,9 @@
-// API Keys
+// API Keys - Replace with your own if needed
 const WEATHER_API_KEY = "925a54f5c17bac334fbcc8214e99f06f";
 const NEWS_API_KEY = "ce62f852b2d3424a9ba85424274c63f6";
+const HOLIDAY_API_URL = "https://date.nager.at/api/v3/publicholidays/";
 
-// Seasonal Backgrounds (your 25 beautiful images)
+// Seasonal Backgrounds
 const seasonalNature = [
   "https://images.pexels.com/photos/132037/pexels-photo-132037.jpeg?w=1920&q=80",
   "https://images.pexels.com/photos/844297/pexels-photo-844297.jpeg?w=1920&q=80",
@@ -31,18 +32,19 @@ const seasonalNature = [
   "https://images.pexels.com/photos/39811/pexels-photo-39811.jpeg?w=1920&q=80"
 ];
 
+let currentBgIndex = 0;
 function changeBackground() {
-  const month = new Date().getMonth();
-  const hour = new Date().getHours();
-  const index = (month * 2) + (hour >= 12 ? 1 : 0);
-  document.body.style.backgroundImage = `url('${seasonalNature[index % seasonalNature.length]}')`;
+  currentBgIndex = (currentBgIndex + 1) % seasonalNature.length;
+  document.body.style.backgroundImage = `url('${seasonalNature[currentBgIndex]}')`;
 }
+
 changeBackground();
-setInterval(changeBackground, 3600000);
+setInterval(changeBackground, 3600000); // Change every hour
 
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 const today = new Date();
+let userCountryCode = 'US';
 
 // 12-HOUR FORMAT WITH AM/PM
 function formatTime12(date) {
@@ -54,7 +56,7 @@ function formatTime12(date) {
   });
 }
 
-// Live Clock - Now in 12-hour format
+// Live Clock
 function updateClock() {
   const now = new Date();
   document.getElementById('dayName').textContent = now.toLocaleDateString('en-US', {weekday:'long'});
@@ -73,18 +75,19 @@ document.getElementById('themeToggle').onclick = () => {
   feather.replace();
 };
 
-// Calendar Logic (unchanged)
+// Calendar Logic
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const monthSelect = document.getElementById('monthSelect');
 const yearInput = document.getElementById('yearInput');
+
 months.forEach((m, i) => {
   const opt = document.createElement('option');
   opt.value = i; opt.textContent = m;
   if (i === currentMonth) opt.selected = true;
   monthSelect.appendChild(opt);
 });
-yearInput.value = currentYear;
 
+yearInput.value = currentYear;
 monthSelect.onchange = () => { currentMonth = parseInt(monthSelect.value); renderCalendar(); };
 yearInput.onchange = () => {
   let y = parseInt(yearInput.value);
@@ -93,12 +96,46 @@ yearInput.onchange = () => {
   renderCalendar();
 };
 
-function renderCalendar() {
+// Holiday Functions
+let cachedHolidays = {};
+async function fetchHolidaysForYear(year, country) {
+  const cacheKey = `${year}-${country}`;
+  if (cachedHolidays[cacheKey]) return cachedHolidays[cacheKey];
+  
+  try {
+    const res = await fetch(`${HOLIDAY_API_URL}${year}/${country}`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+    
+    if (!res.ok) throw new Error('API error');
+    const holidays = await res.json();
+    
+    if (Array.isArray(holidays)) {
+      cachedHolidays[cacheKey] = holidays;
+      return holidays;
+    }
+    return [];
+  } catch (err) {
+    console.log(`Holiday fetch failed for ${country} ${year}:`, err);
+    return [];
+  }
+}
+
+async function getHolidayForDate(day, month, year, country = userCountryCode) {
+  const holidays = await fetchHolidaysForYear(year, country);
+  const targetDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  const holiday = holidays.find(h => h.date === targetDate);
+  return holiday ? holiday.localName || holiday.name : null;
+}
+
+// Render Calendar
+async function renderCalendar() {
   const grid = document.getElementById('calendar');
   grid.innerHTML = '';
   const firstDay = new Date(currentYear, currentMonth, 1).getDay();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
+  
   // Previous month days
   for (let i = firstDay - 1; i >= 0; i--) {
     const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
@@ -107,13 +144,17 @@ function renderCalendar() {
     card.innerHTML = `<span>${prevMonthDays - i}</span>`;
     grid.appendChild(card);
   }
-
+  
   // Current month
   for (let d = 1; d <= daysInMonth; d++) {
     const card = document.createElement('div');
     card.className = 'day-card';
     if (d === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
       card.classList.add('today');
+    }
+    const holiday = await getHolidayForDate(d, currentMonth, currentYear);
+    if (holiday) {
+      card.classList.add('holiday');
     }
     const hue = (d * 16 + currentMonth * 34) % 360;
     card.style.setProperty('--c1', `hsl(${hue}, 92%, 70%)`);
@@ -122,7 +163,7 @@ function renderCalendar() {
     card.onclick = (e) => butterflyToDetail(e, card, d, currentMonth, currentYear);
     grid.appendChild(card);
   }
-
+  
   // Next month filler
   const total = grid.children.length;
   for (let i = 1; i <= 42 - total; i++) {
@@ -133,7 +174,7 @@ function renderCalendar() {
   }
 }
 
-// Butterfly + Detail
+// Butterfly Animation
 function butterflyToDetail(event, card, day, month, year) {
   const rect = card.getBoundingClientRect();
   const clone = card.cloneNode(true);
@@ -145,43 +186,48 @@ function butterflyToDetail(event, card, day, month, year) {
   clone.style.height = rect.height + 'px';
   clone.style.zIndex = 99999;
   document.body.appendChild(clone);
-
-  setTimeout(() => {
-    showDetail(day, month, year);
+  setTimeout(async () => {
+    await showDetail(day, month, year);
     clone.remove();
   }, 2200);
 }
 
-// Get Location → Weather + News
-let userCountryCode = 'us';
-
-function getLocationAndLoad() {
+// Get Location → Weather + Country (Optimized)
+async function getLocationAndLoad() {
   if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(pos => {
-      fetchWeather(pos.coords.latitude, pos.coords.longitude);
-      detectCountryAndFetchNews(pos.coords.latitude, pos.coords.longitude);
-    }, () => {
-      fallbackLocation();
-    });
+    try {
+      const pos = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          timeout: 5000,
+          maximumAge: 300000 // Cache for 5 minutes
+        });
+      });
+      
+      const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&appid=${WEATHER_API_KEY}&units=metric`);
+      const data = await res.json();
+      
+      if (data.sys && data.sys.country) {
+        userCountryCode = data.sys.country;
+      }
+      
+      const temp = Math.round(data.main.temp);
+      const desc = data.weather[0].description.charAt(0).toUpperCase() + data.weather[0].description.slice(1);
+      document.getElementById("weather").innerHTML = `${temp}°C in ${data.name}<br><small>${desc}</small>`;
+      
+      await fetchNewsByCountry(userCountryCode.toLowerCase());
+    } catch (err) {
+      console.log('Location access denied or failed, using default');
+      await fallbackLocation();
+    }
   } else {
-    fallbackLocation();
+    await fallbackLocation();
   }
 }
 
-function fallbackLocation() {
-  fetchWeather(28.6139, 77.2090); // Delhi
-  fetchNewsByCountry('in');
-}
-
-async function detectCountryAndFetchNews(lat, lon) {
-  try {
-    const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}`);
-    const data = await res.json();
-    userCountryCode = data.sys.country.toLowerCase();
-    fetchNewsByCountry(userCountryCode);
-  } catch {
-    fetchNewsByCountry('us');
-  }
+async function fallbackLocation() {
+  userCountryCode = 'US';
+  await fetchWeather(40.7128, -74.0060); // New York
+  await fetchNewsByCountry('us');
 }
 
 // Weather
@@ -197,54 +243,102 @@ async function fetchWeather(lat, lon) {
   }
 }
 
-// News - Now 100% working with CORS proxy fallback
+// Clickable News - Multi-source fallback
 async function fetchNewsByCountry(country = 'us') {
-  const url = `https://newsapi.org/v2/top-headlines?country=${country}&apiKey=${NEWS_API_KEY}&pageSize=3`;
+  const newsEl = document.getElementById("news");
   
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("API error");
-    const data = await res.json();
-    if (data.articles && data.articles.length > 0) {
-      const title = data.articles[0].title.split(" - ")[0].split(" | ")[0];
-      document.getElementById("news").innerHTML = title.length > 90 ? title.substring(0, 87) + "..." : title;
-    } else {
-      document.getElementById("news").textContent = "No news right now";
-    }
-  } catch (err) {
-    // Fallback: Use all-origins CORS proxy (reliable)
-    try {
-      const proxyUrl = `https://api.allorigins.ml/get?url=${encodeURIComponent(url)}`;
+  // Try multiple news sources in order
+  const sources = [
+    // RSS2JSON for Google News
+    async () => {
+      const countryDomain = {
+        'us': 'com', 'gb': 'co.uk', 'ca': 'ca', 'au': 'com.au',
+        'in': 'co.in', 'de': 'de', 'fr': 'fr', 'jp': 'co.jp',
+        'br': 'com.br', 'mx': 'com.mx', 'es': 'es', 'it': 'it'
+      };
+      const domain = countryDomain[country.toLowerCase()] || 'com';
+      const rssUrl = `https://news.google.com/rss?hl=en-${country.toUpperCase()}&gl=${country.toUpperCase()}&ceid=${country.toUpperCase()}:en`;
+      const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=1`;
+      
+      const res = await fetch(apiUrl);
+      const data = await res.json();
+      if (data.status === 'ok' && data.items && data.items.length > 0) {
+        const article = data.items[0];
+        const title = article.title.split(" - ")[0].split(" | ")[0];
+        const shortTitle = title.length > 70 ? title.substring(0, 67) + "..." : title;
+        return `<a href="${article.link}" target="_blank" class="news-link">${shortTitle}</a>`;
+      }
+      throw new Error('No articles');
+    },
+    
+    // Fallback to NewsAPI with proxy
+    async () => {
+      const url = `https://newsapi.org/v2/top-headlines?country=${country}&apiKey=${NEWS_API_KEY}&pageSize=1`;
+      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
       const res = await fetch(proxyUrl);
       const proxyData = await res.json();
       const data = JSON.parse(proxyData.contents);
       if (data.articles && data.articles.length > 0) {
-        const title = data.articles[0].title.split(" - ")[0];
-        document.getElementById("news").innerHTML = title.length > 90 ? title.substring(0, 87) + "..." : title;
+        const article = data.articles[0];
+        const title = article.title.split(" - ")[0].split(" | ")[0];
+        const shortTitle = title.length > 70 ? title.substring(0, 67) + "..." : title;
+        return `<a href="${article.url}" target="_blank" class="news-link">${shortTitle}</a>`;
       }
-    } catch {
-      document.getElementById("news").textContent = "News temporarily unavailable";
+      throw new Error('No articles');
+    },
+    
+    // Final fallback to country-specific Google News
+    async () => {
+      const countryUrls = {
+        'us': 'https://news.google.com',
+        'gb': 'https://news.google.co.uk',
+        'in': 'https://news.google.co.in',
+        'ca': 'https://news.google.ca',
+        'au': 'https://news.google.com.au'
+      };
+      const newsUrl = countryUrls[country.toLowerCase()] || 'https://news.google.com';
+      return `<a href="${newsUrl}" target="_blank" class="news-link">Latest Headlines 📰</a>`;
+    }
+  ];
+  
+  // Try each source until one works
+  for (const source of sources) {
+    try {
+      const result = await source();
+      newsEl.innerHTML = result;
+      return;
+    } catch (err) {
+      continue;
     }
   }
+  
+  // If all fail, show generic link
+  newsEl.innerHTML = '<a href="https://news.google.com" target="_blank" class="news-link">Latest Headlines 📰</a>';
 }
 
 // Show Detail
-function showDetail(day, month, year) {
+async function showDetail(day, month, year) {
   const date = new Date(year, month, day);
-  const overlay = document.getElementById('detailOverlay');
-
   document.getElementById('detailDate').textContent = date.toLocaleDateString('en-US', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
   document.getElementById('detailTime').textContent = formatTime12(new Date());
-
-  // Reset
+  
   document.getElementById("weather").textContent = "Loading...";
   document.getElementById("news").textContent = "Loading...";
-
+  const holidayEl = document.getElementById("holiday");
+  holidayEl.textContent = "Loading...";
+  
+  const overlay = document.getElementById('detailOverlay');
   overlay.style.display = 'flex';
   setTimeout(() => overlay.style.opacity = '1', 100);
-
-  // Fresh data every time
-  getLocationAndLoad();
+  
+  await getLocationAndLoad();
+  
+  const holiday = await getHolidayForDate(day, month, year);
+  if (holiday) {
+    holidayEl.innerHTML = `<a href="https://www.google.com/search?q=${encodeURIComponent(holiday)}" target="_blank" class="holiday-link">${holiday}</a>`;
+  } else {
+    holidayEl.textContent = "Regular day";
+  }
 }
 
 // Close
@@ -255,9 +349,29 @@ document.getElementById('closeBtn').onclick = () => {
 };
 
 // Navigation
-document.getElementById('prevBtn').onclick = () => { currentMonth = (currentMonth - 1 + 12) % 12; if (currentMonth === 11) currentYear--; monthSelect.value = currentMonth; yearInput.value = currentYear; renderCalendar(); };
-document.getElementById('nextBtn').onclick = () => { currentMonth = (currentMonth + 1) % 12; if (currentMonth === 0) currentYear++; monthSelect.value = currentMonth; yearInput.value = currentYear; renderCalendar(); };
-document.getElementById('homeBtn').onclick = () => { currentMonth = today.getMonth(); currentYear = today.getFullYear(); monthSelect.value = currentMonth; yearInput.value = currentYear; renderCalendar(); };
+document.getElementById('prevBtn').onclick = async () => { 
+  currentMonth = (currentMonth - 1 + 12) % 12; 
+  if (currentMonth === 11) currentYear--; 
+  monthSelect.value = currentMonth; 
+  yearInput.value = currentYear; 
+  await renderCalendar(); 
+};
+
+document.getElementById('nextBtn').onclick = async () => { 
+  currentMonth = (currentMonth + 1) % 12; 
+  if (currentMonth === 0) currentYear++; 
+  monthSelect.value = currentMonth; 
+  yearInput.value = currentYear; 
+  await renderCalendar(); 
+};
+
+document.getElementById('homeBtn').onclick = async () => { 
+  currentMonth = today.getMonth(); 
+  currentYear = today.getFullYear(); 
+  monthSelect.value = currentMonth; 
+  yearInput.value = currentYear; 
+  await renderCalendar(); 
+};
 
 // Init
 feather.replace();
