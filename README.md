@@ -4,7 +4,7 @@
 
 A breathtakingly beautiful, fully interactive web calendar with real-time weather, top news, live clock, seasonal nature wallpapers, a rainbow “Today” card, and a **magical butterfly flight animation** when you tap any date.
 
-**Live Demo** → https://bugsfreeweb.github.io/AGoodDay
+**Live Demo**→ https://bugsfreeweb.github.io/AGoodDay
 
 ## Features
 
