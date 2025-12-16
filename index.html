@@ -3,57 +3,489 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A Good Day Calendar • Bugsfree Studio</title>
+<title>A Good Day Calendar Pro • Bugsfree Studio</title>
 <script src="https://unpkg.com/feather-icons"></script>
 <link rel="stylesheet" href="./css/styles.css">
 <link rel="icon" href="./assets/agoodday.png" type="image/png">
-<script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool@latest'></script>
-	
+<!-- <script disable-devtool-auto src='https://cdn.jsdelivr.net/npm/disable-devtool@latest'></script> -->
+
+<!-- Professional Meta Tags -->
+<meta name="description" content="Professional calendar application with weather, news, holidays, and event management">
+<meta name="keywords" content="calendar, weather, news, holidays, events, professional">
+<meta name="author" content="Bugsfree Studio">
+<meta property="og:title" content="A Good Day Calendar Pro">
+<meta property="og:description" content="Professional calendar application with enhanced features">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="A Good Day Calendar Pro">
+<meta name="twitter:description" content="Professional calendar application with enhanced features">
+
+<!-- Critical Resources -->
+<link rel="dns-prefetch" href="//api.openweathermap.org">
+<link rel="dns-prefetch" href="//newsapi.org">
+<link rel="dns-prefetch" href="//date.nager.at">
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "A Good Day Calendar Pro",
+  "description": "Professional calendar application with weather, news, holidays, and event management",
+  "applicationCategory": "ProductivityApplication",
+  "operatingSystem": "All",
+  "author": {
+    "@type": "Organization",
+    "name": "Bugsfree Studio"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+
 </head>
 <body data-theme="dark">
-<div class="theme-toggle" id="themeToggle">
+<!-- Accessibility Skip Link -->
+<a href="#main-content" class="sr-only">Skip to main content</a>
+
+<!-- Beautiful Animated Splash Screen -->
+<div id="splashScreen" class="splash-screen">
+  <div class="splash-content">
+    <div class="splash-logo">
+      <div class="logo-circle">
+        <i data-feather="calendar" class="splash-icon"></i>
+      </div>
+      <div class="logo-text">
+        <h1>A Good Day Calendar</h1>
+        <p>Professional Calendar Experience</p>
+      </div>
+    </div>
+    <div class="splash-loader">
+      <div class="loader-spinner"></div>
+      <p>Loading your perfect day...</p>
+    </div>
+  </div>
+  <div class="splash-bg-pattern"></div>
+</div>
+
+<!-- Theme Toggle -->
+<div class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
   <i data-feather="moon" id="themeIcon"></i>
 </div>
-<div class="header">
+
+<!-- Professional Header -->
+<header class="header" role="banner">
   <div class="left-info">
-    <div class="live-time"><i data-feather="clock"></i> <span id="liveTime">2:32:18 PM</span></div>
-    <div class="day-name"><i data-feather="calendar"></i> <span id="dayName">Monday</span></div>
+    <div class="live-time" aria-live="polite">
+      <i data-feather="clock" aria-hidden="true"></i> 
+      <span id="liveTime">2:32:18 PM</span>
+    </div>
+    <div class="day-name">
+      <i data-feather="calendar" aria-hidden="true"></i> 
+      <span id="dayName">Monday</span>
+    </div>
   </div>
-  <div class="month-selector">
-    <select id="monthSelect"></select>
-    <input type="number" id="yearInput" min="1950" max="2050" value="2025">
+  
+  <!-- Enhanced Month Selector -->
+  <div class="month-selector" role="group" aria-label="Date navigation">
+    <select id="monthSelect" aria-label="Select month">
+      <option value="" disabled>Select Month</option>
+    </select>
+    <input type="number" id="yearInput" min="1950" max="2050" value="2025" aria-label="Enter year">
   </div>
-  <div class="current-date-badge">
+  
+  <!-- Current Date Badge -->
+  <div class="current-date-badge" aria-live="polite">
     <div class="big-date" id="bigDate">30</div>
     <div class="date-label" id="dateLabel">November 2025</div>
   </div>
-</div>
-<div class="nav-btn nav-prev" id="prevBtn"><i data-feather="chevron-left"></i></div>
-<div class="nav-btn nav-next" id="nextBtn"><i data-feather="chevron-right"></i></div>
-<button class="home-btn" id="homeBtn">
-  <i data-feather="home"></i> Today
-</button>
-<div class="calendar-grid" id="calendar"></div>
-<div id="detailOverlay">
-  <div class="detail-card">
-    <div class="close-btn" id="closeBtn"><i data-feather="x"></i></div>
-    <div class="detail-date" id="detailDate">30 November 2025</div>
-    <div class="info-grid">
-      <div class="info-item"><i data-feather="clock"></i> <div><strong>Time</strong><br><span id="detailTime">--:--</span></div></div>
-      <div class="info-item"><i data-feather="cloud"></i> <div><strong>Weather</strong><br><span id="weather">Loading...</span></div></div>
-      <div class="info-item"><i data-feather="gift"></i> <div><strong>Special Day</strong><br><span id="holiday">Loading...</span></div></div>
-      <div class="info-item"><i data-feather="zap"></i> <div><strong>Top News</strong><br><span id="news">Loading...</span></div></div>
+</header>
+
+<!-- Navigation Controls -->
+<nav class="navigation-controls" role="navigation" aria-label="Calendar navigation">
+  <button class="nav-btn nav-prev" id="prevBtn" aria-label="Previous month">
+    <i data-feather="chevron-left" aria-hidden="true"></i>
+  </button>
+  <button class="nav-btn nav-next" id="nextBtn" aria-label="Next month">
+    <i data-feather="chevron-right" aria-hidden="true"></i>
+  </button>
+</nav>
+
+
+
+<!-- Professional Settings Sidebar -->
+<div class="settings-overlay" id="settingsOverlay"></div>
+<aside class="settings-sidebar" id="settingsSidebar" role="complementary" aria-label="Settings panel">
+  <div class="settings-header">
+    <h2>Settings</h2>
+    <button class="settings-close" id="settingsClose" aria-label="Close settings">
+      <i data-feather="x" aria-hidden="true"></i>
+    </button>
+  </div>
+  
+  <div class="settings-content">
+    <!-- Appearance Settings -->
+    <div class="settings-section">
+      <h3><i data-feather="droplet" aria-hidden="true"></i> Appearance</h3>
+      <div class="setting-group">
+        <label for="themeSelect">Theme</label>
+        <select id="themeSelect">
+          <option value="dark">Dark Mode</option>
+          <option value="light">Light Mode</option>
+        </select>
+      </div>
+      <div class="setting-group">
+        <label for="timeFormatSelect">Time Format</label>
+        <select id="timeFormatSelect">
+          <option value="12h">12 Hour (AM/PM)</option>
+          <option value="24h">24 Hour</option>
+        </select>
+      </div>
     </div>
-    <div class="detail-footer">
-      <div>Designed by <strong>Bugsfree Studio</strong> | <script>document.write(new Date().getFullYear())</script></div>
-      <div style="margin-top: 14px;">
-        <a href="https://github.com/bugsfreeweb" target="_blank"><i data-feather="github"></i></a>
-        <a href="https://x.com/bugsfreeweb" target="_blank"><i data-feather="twitter"></i></a>
+
+    <!-- Calendar Settings -->
+    <div class="settings-section">
+      <h3><i data-feather="calendar" aria-hidden="true"></i> Calendar</h3>
+      <div class="setting-group">
+        <label for="weekStartSelect">Week Starts On</label>
+        <select id="weekStartSelect">
+          <option value="0">Sunday</option>
+          <option value="1">Monday</option>
+        </select>
+      </div>
+      <div class="setting-group">
+        <label>
+          <input type="checkbox" id="autoLocationToggle">
+          Auto Location Detection
+        </label>
+      </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="settings-section">
+      <h3><i data-feather="bell" aria-hidden="true"></i> Notifications</h3>
+      <div class="setting-group">
+        <label>
+          <input type="checkbox" id="notificationsToggle">
+          Enable Notifications
+        </label>
+      </div>
+    </div>
+
+    <!-- Data Management -->
+    <div class="settings-section">
+      <h3><i data-feather="database" aria-hidden="true"></i> Data</h3>
+      <div class="setting-group">
+        <button class="settings-btn export-btn" id="exportBtn">
+          <i data-feather="download" aria-hidden="true"></i>
+          Export Data
+        </button>
+        <input type="file" id="importFile" accept=".json" style="display: none;">
+        <button class="settings-btn import-btn" id="importBtn">
+          <i data-feather="upload" aria-hidden="true"></i>
+          Import Data
+        </button>
+      </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="settings-section">
+      <h3><i data-feather="bar-chart-2" aria-hidden="true"></i> Statistics</h3>
+      <div class="stats-display" id="statsDisplay">
+        <div class="stat-item">
+          <span class="stat-label">Total Clicks</span>
+          <span class="stat-value" id="totalClicks">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Days Viewed</span>
+          <span class="stat-value" id="totalDaysViewed">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Events Created</span>
+          <span class="stat-value" id="totalEvents">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="settings-section">
+      <h3><i data-feather="info" aria-hidden="true"></i> About</h3>
+      <div class="about-content">
+        <p><strong>A Good Day Calendar Pro</strong></p>
+        <p>Version 2.0.0</p>
+        <p>Designed by <strong>Bugsfree Studio</strong></p>
+        <div class="social-links">
+          <a href="https://github.com/bugsfreeweb" target="_blank" rel="noopener noreferrer">
+            <i data-feather="github" aria-hidden="true"></i>
+          </a>
+          <a href="https://x.com/bugsfreeweb" target="_blank" rel="noopener noreferrer">
+            <i data-feather="twitter" aria-hidden="true"></i>
+          </a>
+          <a href="https://bugsfree.netlify.app" target="_blank" rel="noopener noreferrer">
+            <i data-feather="globe" aria-hidden="true"></i>
+          </a>
+        </div>
       </div>
     </div>
   </div>
+</aside>
+
+<!-- Settings Toggle Button -->
+<button class="settings-toggle" id="settingsToggle" aria-label="Open settings" title="Open Settings">
+  <i data-feather="settings" aria-hidden="true"></i>
+</button>
+
+<!-- Statistics moved to settings sidebar -->
+
+<!-- Home Button -->
+<button class="home-btn" id="homeBtn" aria-label="Go to today">
+  <i data-feather="home" aria-hidden="true"></i> 
+  Today
+</button>
+
+<!-- Main Calendar Content -->
+<main id="main-content" class="calendar-main" role="main">
+  <div class="calendar-grid" id="calendar" role="grid" aria-label="Calendar grid">
+    <!-- Calendar days will be generated here -->
+  </div>
+</main>
+
+<!-- Enhanced Detail Overlay -->
+<div id="detailOverlay" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+  <div class="detail-card">
+    <button class="close-btn" id="closeBtn" aria-label="Close details">
+      <i data-feather="x" aria-hidden="true"></i>
+    </button>
+    
+    <h2 class="detail-date" id="detailTitle">30 November 2025</h2>
+    
+    <!-- Enhanced Information Grid -->
+    <div class="info-grid" role="group" aria-label="Day information">
+      <div class="info-item">
+        <i data-feather="clock" aria-hidden="true"></i> 
+        <div>
+          <strong>Time</strong>
+          <br>
+          <span id="detailTime" aria-live="polite">--:--</span>
+        </div>
+      </div>
+      
+      <div class="info-item">
+        <img src="" alt="" id="weatherIcon" class="weather-icon" style="display: none;" aria-hidden="true">
+        <div>
+          <strong>Weather</strong>
+          <br>
+          <span id="weather" aria-live="polite">Loading...</span>
+        </div>
+      </div>
+      
+      <div class="info-item">
+        <img src="" alt="" id="holidayIcon" class="holiday-icon" style="display: none;" aria-hidden="true">
+        <div>
+          <strong>Special Day</strong>
+          <br>
+          <span id="holiday" aria-live="polite">Loading...</span>
+        </div>
+      </div>
+      
+      <div class="info-item">
+        <img src="" alt="" id="newsIcon" class="news-icon" style="display: none;" aria-hidden="true">
+        <div>
+          <strong>Top News</strong>
+          <br>
+          <span id="news" aria-live="polite">Loading...</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Professional Footer -->
+    <footer class="detail-footer" role="contentinfo">
+      <div>
+        Designed by <strong>Bugsfree Studio</strong> | <span id="currentYear"></span>
+      </div>
+      <div class="social-links">
+          <a href="https://github.com/bugsfreeweb" target="_blank" rel="noopener noreferrer">
+            <i data-feather="github" aria-hidden="true"></i>
+          </a>
+          <a href="https://x.com/bugsfreeweb" target="_blank" rel="noopener noreferrer">
+            <i data-feather="twitter" aria-hidden="true"></i>
+          </a>
+          <a href="https://bugsfree.netlify.app" target="_blank" rel="noopener noreferrer">
+            <i data-feather="globe" aria-hidden="true"></i>
+          </a>
+        </div>
+      
+      <!-- Professional Features Information -->
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid var(--glass-border); font-size: 0.9rem;">
+        <strong>Pro Features:</strong> 
+        <span style="color: var(--accent-glow);">
+          Events • Statistics • Settings • Export/Import
+        </span>
+      </div>
+    </footer>
+  </div>
 </div>
+
+<!-- Professional Loading Indicator -->
+<div id="globalLoader" style="
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  right: 0; 
+  bottom: 0; 
+  background: var(--overlay-dark); 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  z-index: 10000;
+  backdrop-filter: blur(40px);
+  transition: opacity 0.5s ease;
+" aria-live="polite" aria-label="Loading application">
+  <div style="text-align: center; color: var(--text-dark);">
+    <div style="
+      width: 60px; 
+      height: 60px; 
+      border: 3px solid var(--glass-border); 
+      border-top: 3px solid var(--accent-dark); 
+      border-radius: 50%; 
+      animation: spin 1s linear infinite; 
+      margin: 0 auto 20px;
+    "></div>
+    <div style="font-size: 1.2rem; font-weight: 600; background: linear-gradient(90deg, var(--accent-dark), #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+      Loading A Good Day Calendar Pro...
+    </div>
+    <div style="margin-top: 8px; font-size: 0.9rem; color: var(--accent-glow);">
+      Initializing professional features
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+
+<!-- Enhanced Scripts -->
 <script src="./js/app.js"></script>
+
+<!-- Professional Service Worker Registration -->
+<script>
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(registration => {
+        console.log('SW registered: ', registration);
+      })
+      .catch(registrationError => {
+        console.log('SW registration failed: ', registrationError);
+      });
+  });
+} else {
+  console.log('ℹ️ Service Worker: Running locally (file:// protocol) - PWA features available when hosted on HTTPS server');
+}
+</script>
+
+<!-- Analytics and Performance Monitoring -->
+<script>
+// Professional error handling
+window.addEventListener('error', (e) => {
+  console.error('Application error:', e.error);
+  // In production, send to error tracking service
+});
+
+// Performance monitoring
+window.addEventListener('load', () => {
+  try {
+    const perfData = performance.getEntriesByType('navigation')[0];
+    if (perfData && perfData.loadEventEnd && perfData.loadEventStart) {
+      const loadTime = perfData.loadEventEnd - perfData.loadEventStart;
+      if (loadTime > 0) {
+        console.log('Page load time:', loadTime, 'ms');
+      }
+    }
+  } catch (error) {
+    console.log('Performance monitoring not available');
+  }
+  
+  // Hide loader after everything is ready
+  setTimeout(() => {
+    const loader = document.getElementById('globalLoader');
+    if (loader) {
+      loader.style.opacity = '0';
+      setTimeout(() => loader.remove(), 500);
+    }
+  }, 1000);
+});
+
+// Set current year in footer
+document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+
+<!-- Professional Progressive Web App Features -->
+<script>
+// PWA Install prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  // Show install button if needed
+  const installBtn = document.createElement('button');
+  installBtn.innerHTML = '<i data-feather="download"></i> Install App';
+  installBtn.className = 'install-btn';
+  installBtn.style.cssText = `
+    position: fixed;
+    bottom: 120px;
+    right: 20px;
+    background: var(--accent-dark);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  `;
+  
+  installBtn.onclick = () => {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      }
+      deferredPrompt = null;
+      installBtn.remove();
+    });
+  };
+  
+  document.body.appendChild(installBtn);
+  feather.replace();
+});
+
+// Notification permission - Requested only when needed
+let notificationPermissionRequested = false;
+
+function requestNotificationPermission() {
+  if (!notificationPermissionRequested && 'Notification' in window && Notification.permission === 'default') {
+    notificationPermissionRequested = true;
+    Notification.requestPermission().then(permission => {
+      console.log('Notification permission:', permission);
+    });
+  }
+}
+
+// Only request notification permission when user actually enables notifications in settings
+// Removed automatic request on page load
+</script>
+
 </body>
 </html>
-
