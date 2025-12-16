@@ -1,5 +1,5 @@
 // Professional Service Worker for PWA functionality
-const CACHE_NAME = 'agoodday-calendar-pro-v1.0.0';
+const CACHE_NAME = 'agoodday-calendar-pro-v2.0.0';
 const urlsToCache = [
   './',
   './index.html',

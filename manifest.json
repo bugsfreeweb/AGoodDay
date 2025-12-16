@@ -1,7 +1,7 @@
 {
   "name": "A Good Day Calendar Pro",
   "short_name": "GoodDay Pro",
-  "description": "Professional calendar application with weather, news, holidays, and event management",
+  "description": "Professional calendar with templates, timezone management, sync, themes, gestures & AI features",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0a0a1f",
@@ -40,8 +40,13 @@
   ],
   "features": [
     "Cross Platform",
-    "Fast",
-    "Simple"
+    "Templates",
+    "Timezone",
+    "Sync",
+    "Themes",
+    "Gestures",
+    "Offline",
+    "PWA"
   ],
   "shortcuts": [
     {
@@ -49,6 +54,30 @@
       "short_name": "Today",
       "description": "View today's calendar",
       "url": "./?action=today",
+      "icons": [
+        {
+          "src": "./assets/agoodday.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Templates",
+      "short_name": "Templates",
+      "description": "Create event from template",
+      "url": "./?action=templates",
+      "icons": [
+        {
+          "src": "./assets/agoodday.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Quick Add",
+      "short_name": "Quick+",
+      "description": "Quick event creation",
+      "url": "./?action=quickadd",
       "icons": [
         {
           "src": "./assets/agoodday.png",

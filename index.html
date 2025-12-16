@@ -157,9 +157,74 @@
         </select>
       </div>
       <div class="setting-group">
+        <label for="timezoneSelect">Time Zone</label>
+        <select id="timezoneSelect">
+          <option value="auto">Auto Detect</option>
+        </select>
+      </div>
+      <div class="setting-group">
         <label>
           <input type="checkbox" id="autoLocationToggle">
-          Auto Location Detection
+          Smart Location Detection
+        </label>
+      </div>
+      <div class="setting-group">
+        <label>
+          <input type="checkbox" id="calendarSyncToggle">
+          Calendar Sync (Google/Outlook/Apple)
+        </label>
+      </div>
+    </div>
+
+    <!-- Calendar Templates -->
+    <div class="settings-section">
+      <h3><i data-feather="layout" aria-hidden="true"></i> Event Templates</h3>
+      <div class="setting-group">
+        <label for="templateSelect">Quick Templates</label>
+        <select id="templateSelect">
+          <option value="">Select a template...</option>
+          <option value="meeting">Business Meeting</option>
+          <option value="birthday">Birthday Party</option>
+          <option value="vacation">Vacation Trip</option>
+          <option value="appointment">Doctor Appointment</option>
+          <option value="workout">Workout Session</option>
+          <option value="study">Study Session</option>
+          <option value="party">Social Party</option>
+          <option value="conference">Conference Call</option>
+        </select>
+      </div>
+      <button class="settings-btn" id="createTemplateBtn">
+        <i data-feather="plus" aria-hidden="true"></i>
+        Create Custom Template
+      </button>
+    </div>
+
+    <!-- Enhanced Visual Features -->
+    <div class="settings-section">
+      <h3><i data-feather="palette" aria-hidden="true"></i> Visual Enhancements</h3>
+      <div class="setting-group">
+        <label for="themeModeSelect">Dynamic Theme Mode</label>
+        <select id="themeModeSelect">
+          <option value="manual">Manual</option>
+          <option value="seasonal">Auto Seasonal</option>
+          <option value="weather">Weather Based</option>
+          <option value="holiday">Holiday Themes</option>
+        </select>
+      </div>
+      <div class="setting-group">
+        <label for="backgroundSelect">Calendar Background</label>
+        <select id="backgroundSelect">
+          <option value="default">Default</option>
+          <option value="seasonal">Seasonal</option>
+          <option value="nature">Nature Collection</option>
+          <option value="upload">Upload Custom</option>
+        </select>
+        <input type="file" id="backgroundUpload" accept="image/*" style="display: none;">
+      </div>
+      <div class="setting-group">
+        <label>
+          <input type="checkbox" id="animationsToggle" checked>
+          Interactive Animations
         </label>
       </div>
     </div>
@@ -253,6 +318,82 @@
   </div>
 </main>
 
+<!-- Template Creation Modal -->
+<div id="templateModal" class="template-modal" style="display: none;">
+  <div class="template-content">
+    <div class="template-header">
+      <h3>Create Custom Event Template</h3>
+      <button class="template-close" id="templateClose">
+        <i data-feather="x" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="template-form">
+      <div class="template-field">
+        <label for="templateName">Template Name</label>
+        <input type="text" id="templateName" placeholder="e.g., Weekly Team Meeting">
+      </div>
+      <div class="template-field">
+        <label for="templateDescription">Description</label>
+        <textarea id="templateDescription" placeholder="Brief description..."></textarea>
+      </div>
+      <div class="template-field">
+        <label for="templateTime">Default Time</label>
+        <input type="time" id="templateTime">
+      </div>
+      <div class="template-field">
+        <label for="templateDuration">Duration (minutes)</label>
+        <input type="number" id="templateDuration" value="60" min="15" max="480">
+      </div>
+      <div class="template-field">
+        <label for="templateColor">Color Theme</label>
+        <select id="templateColor">
+          <option value="purple">Purple</option>
+          <option value="blue">Blue</option>
+          <option value="green">Green</option>
+          <option value="orange">Orange</option>
+          <option value="red">Red</option>
+        </select>
+      </div>
+      <div class="template-buttons">
+        <button class="template-save" id="saveTemplate">Save Template</button>
+        <button class="template-cancel" id="cancelTemplate">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions Menu -->
+<div id="quickActionsMenu" class="quick-actions-menu" style="display: none;">
+  <div class="quick-actions-content">
+    <button class="quick-action-btn" data-action="newEvent">
+      <i data-feather="plus"></i>
+      <span>New Event</span>
+    </button>
+    <button class="quick-action-btn" data-action="quickAdd">
+      <i data-feather="edit"></i>
+      <span>Quick Add</span>
+    </button>
+    <button class="quick-action-btn" data-action="viewToday">
+      <i data-feather="home"></i>
+      <span>Go to Today</span>
+    </button>
+    <button class="quick-action-btn" data-action="settings">
+      <i data-feather="settings"></i>
+      <span>Settings</span>
+    </button>
+  </div>
+</div>
+
+<!-- Background Upload Indicator -->
+<div id="backgroundUploadIndicator" class="background-upload-indicator" style="display: none;">
+  <div class="upload-progress">
+    <div class="progress-bar">
+      <div class="progress-fill" id="uploadProgress"></div>
+    </div>
+    <p>Uploading background image...</p>
+  </div>
+</div>
+
 <!-- Enhanced Detail Overlay -->
 <div id="detailOverlay" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
   <div class="detail-card">
@@ -322,7 +463,7 @@
       <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid var(--glass-border); font-size: 0.9rem;">
         <strong>Pro Features:</strong> 
         <span style="color: var(--accent-glow);">
-          Events • Statistics • Settings • Export/Import
+          Templates • Timezone • Sync • Themes • Swipe • Quick Actions • Analytics
         </span>
       </div>
     </footer>
@@ -379,14 +520,14 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
       .then(registration => {
-        console.log('SW registered: ', registration);
+        console.log('✅ Service Worker registered successfully:', registration);
       })
       .catch(registrationError => {
-        console.log('SW registration failed: ', registrationError);
+        console.log('❌ Service Worker registration failed:', registrationError);
       });
   });
 } else {
-  console.log('ℹ️ Service Worker: Running locally (file:// protocol) - PWA features available when hosted on HTTPS server');
+  console.log('ℹ️ Service Worker: Running locally (file:// protocol) - PWA features will work when hosted on HTTPS server');
 }
 </script>
 

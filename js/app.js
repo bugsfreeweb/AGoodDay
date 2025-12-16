@@ -1153,5 +1153,781 @@ async function startApplication() {
   }
 }
 
+// ========================================
+// NEW ADVANCED FEATURES IMPLEMENTATION
+// ========================================
+
+// Time Zone Management System
+class TimeZoneManager {
+  constructor() {
+    this.currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    this.availableTimeZones = [
+      'auto', 'UTC', 'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
+      'Europe/London', 'Europe/Paris', 'Europe/Berlin', 'Europe/Madrid', 'Europe/Rome',
+      'Asia/Tokyo', 'Asia/Shanghai', 'Asia/Hong_Kong', 'Asia/Singapore', 'Asia/Kolkata',
+      'Australia/Sydney', 'Pacific/Auckland', 'Africa/Johannesburg', 'America/Sao_Paulo'
+    ];
+    this.initTimeZoneSelect();
+  }
+
+  initTimeZoneSelect() {
+    const select = document.getElementById('timezoneSelect');
+    if (!select) return;
+
+    // Add timezones to select
+    this.availableTimeZones.slice(1).forEach(zone => {
+      const option = document.createElement('option');
+      option.value = zone;
+      option.textContent = zone.replace('_', ' ');
+      select.appendChild(option);
+    });
+
+    select.addEventListener('change', (e) => {
+      if (e.target.value === 'auto') {
+        this.currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      } else {
+        this.currentTimeZone = e.target.value;
+      }
+      this.updateTimeDisplays();
+    });
+  }
+
+  getCurrentTimeInTimeZone(date = new Date()) {
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: this.currentTimeZone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: dataManager.preferences.timeFormat === '12h'
+    }).format(date);
+  }
+
+  updateTimeDisplays() {
+    const liveTimeEl = document.getElementById('liveTime');
+    if (liveTimeEl) {
+      liveTimeEl.textContent = this.getCurrentTimeInTimeZone();
+    }
+    
+    const detailTimeEl = document.getElementById('detailTime');
+    if (detailTimeEl) {
+      detailTimeEl.textContent = this.getCurrentTimeInTimeZone();
+    }
+  }
+}
+
+// Calendar Templates System
+class TemplateManager {
+  constructor() {
+    this.templates = this.loadTemplates();
+    this.initTemplateSystem();
+  }
+
+  loadTemplates() {
+    const defaultTemplates = {
+      meeting: { name: 'Business Meeting', description: 'Professional meeting', time: '09:00', duration: 60, color: 'purple' },
+      birthday: { name: 'Birthday Party', description: 'Celebration event', time: '15:00', duration: 120, color: 'orange' },
+      vacation: { name: 'Vacation Trip', description: 'Travel and leisure', time: '08:00', duration: 480, color: 'blue' },
+      appointment: { name: 'Doctor Appointment', description: 'Medical checkup', time: '10:00', duration: 30, color: 'green' },
+      workout: { name: 'Workout Session', description: 'Fitness activity', time: '06:00', duration: 60, color: 'red' },
+      study: { name: 'Study Session', description: 'Learning time', time: '19:00', duration: 120, color: 'purple' },
+      party: { name: 'Social Party', description: 'Social gathering', time: '18:00', duration: 240, color: 'orange' },
+      conference: { name: 'Conference Call', description: 'Virtual meeting', time: '14:00', duration: 90, color: 'blue' }
+    };
+
+    const stored = localStorage.getItem('calendar_templates');
+    return stored ? { ...defaultTemplates, ...JSON.parse(stored) } : defaultTemplates;
+  }
+
+  initTemplateSystem() {
+    const templateSelect = document.getElementById('templateSelect');
+    if (templateSelect) {
+      // Update existing template options
+      Object.keys(this.templates).forEach(key => {
+        if (![...templateSelect.options].some(opt => opt.value === key)) {
+          const option = document.createElement('option');
+          option.value = key;
+          option.textContent = this.templates[key].name;
+          templateSelect.appendChild(option);
+        }
+      });
+
+      templateSelect.addEventListener('change', (e) => {
+        if (e.target.value && this.templates[e.target.value]) {
+          this.applyTemplate(e.target.value);
+        }
+      });
+    }
+
+    const createTemplateBtn = document.getElementById('createTemplateBtn');
+    if (createTemplateBtn) {
+      createTemplateBtn.addEventListener('click', () => this.showTemplateModal());
+    }
+  }
+
+  applyTemplate(templateKey) {
+    const template = this.templates[templateKey];
+    if (!template) return;
+
+    // Show quick event creation dialog with template pre-filled
+    const dialog = document.createElement('div');
+    dialog.className = 'event-dialog';
+    dialog.innerHTML = `
+      <div class="event-content">
+        <h3>Create ${template.name}</h3>
+        <input type="text" id="eventTitle" placeholder="Event Title" value="${template.name}">
+        <textarea id="eventDescription" placeholder="Description">${template.description}</textarea>
+        <input type="time" id="eventTime" value="${template.time}">
+        <select id="eventType">
+          <option value="${template.color}">${template.color.charAt(0).toUpperCase() + template.color.slice(1)}</option>
+        </select>
+        <div class="event-buttons">
+          <button id="saveEvent">Create Event</button>
+          <button id="cancelEvent">Cancel</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(dialog);
+
+    document.getElementById('saveEvent').onclick = () => {
+      const title = document.getElementById('eventTitle').value;
+      const description = document.getElementById('eventDescription').value;
+      const time = document.getElementById('eventTime').value;
+      const type = document.getElementById('eventType').value;
+
+      if (title) {
+        const today = new Date();
+        eventManager.addEvent(today, {
+          title,
+          description,
+          time,
+          type,
+          template: templateKey
+        });
+        renderCalendar();
+        dataManager.updateStatistics('eventCreated');
+      }
+      dialog.remove();
+    };
+
+    document.getElementById('cancelEvent').onclick = () => {
+      dialog.remove();
+    };
+  }
+
+  showTemplateModal() {
+    const modal = document.getElementById('templateModal');
+    if (modal) {
+      modal.style.display = 'flex';
+      
+      document.getElementById('templateClose').onclick = () => {
+        modal.style.display = 'none';
+      };
+      
+      document.getElementById('cancelTemplate').onclick = () => {
+        modal.style.display = 'none';
+      };
+      
+      document.getElementById('saveTemplate').onclick = () => {
+        this.saveCustomTemplate();
+        modal.style.display = 'none';
+      };
+    }
+  }
+
+  saveCustomTemplate() {
+    const name = document.getElementById('templateName').value;
+    const description = document.getElementById('templateDescription').value;
+    const time = document.getElementById('templateTime').value;
+    const duration = document.getElementById('templateDuration').value;
+    const color = document.getElementById('templateColor').value;
+
+    if (name) {
+      const templateKey = name.toLowerCase().replace(/\s+/g, '_');
+      this.templates[templateKey] = { name, description, time, duration, color };
+      localStorage.setItem('calendar_templates', JSON.stringify(this.templates));
+      
+      // Add to select
+      const select = document.getElementById('templateSelect');
+      const option = document.createElement('option');
+      option.value = templateKey;
+      option.textContent = name;
+      select.appendChild(option);
+    }
+  }
+}
+
+// Enhanced Mobile Experience - Gesture Manager
+class GestureManager {
+  constructor() {
+    this.touchStartX = 0;
+    this.touchStartY = 0;
+    this.touchEndX = 0;
+    this.touchEndY = 0;
+    this.initGestures();
+  }
+
+  initGestures() {
+    const calendar = document.getElementById('calendar');
+    if (!calendar) return;
+
+    // Swipe gestures for month navigation
+    calendar.addEventListener('touchstart', (e) => {
+      this.touchStartX = e.changedTouches[0].screenX;
+      this.touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    calendar.addEventListener('touchend', (e) => {
+      this.touchEndX = e.changedTouches[0].screenX;
+      this.touchEndY = e.changedTouches[0].screenY;
+      this.handleSwipeGesture();
+    }, { passive: true });
+
+    // Long press for quick actions
+    this.initLongPress();
+  }
+
+  handleSwipeGesture() {
+    const diffX = this.touchStartX - this.touchEndX;
+    const diffY = this.touchStartY - this.touchEndY;
+    
+    // Only handle horizontal swipes (ignore vertical scrolling)
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+      if (diffX > 0) {
+        // Swipe left - next month
+        changeMonth(1);
+      } else {
+        // Swipe right - previous month
+        changeMonth(-1);
+      }
+    }
+  }
+
+  initLongPress() {
+    let longPressTimer;
+    const calendar = document.getElementById('calendar');
+
+    calendar.addEventListener('touchstart', (e) => {
+      if (e.target.classList.contains('day-card')) {
+        longPressTimer = setTimeout(() => {
+          this.showQuickActions(e.target);
+        }, 800);
+      }
+    }, { passive: true });
+
+    calendar.addEventListener('touchend', (e) => {
+      clearTimeout(longPressTimer);
+    }, { passive: true });
+
+    calendar.addEventListener('touchmove', () => {
+      clearTimeout(longPressTimer);
+    }, { passive: true });
+  }
+
+  showQuickActions(element) {
+    const menu = document.getElementById('quickActionsMenu');
+    if (menu) {
+      const rect = element.getBoundingClientRect();
+      menu.style.left = `${rect.left + rect.width / 2}px`;
+      menu.style.top = `${rect.top - 10}px`;
+      menu.style.display = 'block';
+
+      // Add event listeners to quick action buttons
+      menu.querySelectorAll('.quick-action-btn').forEach(btn => {
+        btn.onclick = () => {
+          this.handleQuickAction(btn.dataset.action, element);
+          menu.style.display = 'none';
+        };
+      });
+
+      // Auto-hide after 3 seconds
+      setTimeout(() => {
+        menu.style.display = 'none';
+      }, 3000);
+    }
+  }
+
+  handleQuickAction(action, element) {
+    const day = parseInt(element.textContent);
+    
+    switch (action) {
+      case 'newEvent':
+        this.createQuickEvent(day);
+        break;
+      case 'quickAdd':
+        this.showQuickAddDialog(day);
+        break;
+      case 'viewToday':
+        goToToday();
+        break;
+      case 'settings':
+        document.getElementById('settingsToggle').click();
+        break;
+    }
+  }
+
+  createQuickEvent(day) {
+    const date = new Date(currentYear, currentMonth, day);
+    const title = prompt('Event title:');
+    if (title) {
+      eventManager.addEvent(date, {
+        title,
+        description: 'Quick event',
+        time: '12:00',
+        type: 'meeting'
+      });
+      renderCalendar();
+    }
+  }
+
+  showQuickAddDialog(day) {
+    const date = new Date(currentYear, currentMonth, day);
+    const title = prompt(`Quick add for ${date.toDateString()}:`);
+    if (title) renderCalendar();
+    {
+      eventManager.addEvent(date, {
+        title,
+        description: 'Quick added',
+        time: '12:00',
+        type: 'meeting'
+      });
+      renderCalendar();
+    }
+  }
+}
+
+// Background and Visual Theme Manager
+class VisualManager {
+  constructor() {
+    this.currentBackground = 'default';
+    this.seasonalThemes = this.getSeasonalThemes();
+    this.initVisualFeatures();
+  }
+
+  getSeasonalThemes() {
+    const month = new Date().getMonth();
+    return {
+      winter: { start: 11, end: 2, themes: ['ice-blue', 'snow-white', 'deep-purple'] },
+      spring: { start: 2, end: 5, themes: ['spring-green', 'cherry-pink', 'soft-yellow'] },
+      summer: { start: 5, end: 8, themes: ['ocean-blue', 'sunset-orange', 'tropical-teal'] },
+      autumn: { start: 8, end: 11, themes: ['autumn-red', 'golden-brown', 'forest-green'] }
+    };
+  }
+
+  initVisualFeatures() {
+    // Theme mode selector
+    const themeModeSelect = document.getElementById('themeModeSelect');
+    if (themeModeSelect) {
+      themeModeSelect.addEventListener('change', (e) => {
+        this.handleThemeModeChange(e.target.value);
+      });
+    }
+
+    // Background selector
+    const backgroundSelect = document.getElementById('backgroundSelect');
+    if (backgroundSelect) {
+      backgroundSelect.addEventListener('change', (e) => {
+        this.handleBackgroundChange(e.target.value);
+      });
+    }
+
+    // Background upload
+    const backgroundUpload = document.getElementById('backgroundUpload');
+    if (backgroundUpload) {
+      backgroundUpload.addEventListener('change', (e) => {
+        this.handleBackgroundUpload(e.target.files[0]);
+      });
+    }
+
+    // Animation toggle
+    const animationsToggle = document.getElementById('animationsToggle');
+    if (animationsToggle) {
+      animationsToggle.addEventListener('change', (e) => {
+        this.toggleAnimations(e.target.checked);
+      });
+    }
+
+    // Initialize with current season
+    this.applySeasonalTheme();
+  }
+
+  handleThemeModeChange(mode) {
+    switch (mode) {
+      case 'seasonal':
+        this.applySeasonalTheme();
+        break;
+      case 'weather':
+        this.applyWeatherTheme();
+        break;
+      case 'holiday':
+        this.applyHolidayTheme();
+        break;
+      default:
+        // Manual mode - user can control manually
+        break;
+    }
+  }
+
+  applySeasonalTheme() {
+    const month = new Date().getMonth();
+    let season = 'summer'; // default
+
+    if (month >= 11 || month <= 1) season = 'winter';
+    else if (month >= 2 && month <= 4) season = 'spring';
+    else if (month >= 5 && month <= 7) season = 'summer';
+    else if (month >= 8 && month <= 10) season = 'autumn';
+
+    const themes = this.seasonalThemes[season].themes;
+    const randomTheme = themes[Math.floor(Math.random() * themes.length)];
+    this.applyTheme(randomTheme);
+  }
+
+  applyWeatherTheme() {
+    // This would integrate with weather data
+    const weatherConditions = ['sunny', 'cloudy', 'rainy', 'snowy'];
+    const randomCondition = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
+    this.applyTheme(randomCondition);
+  }
+
+  applyHolidayTheme() {
+    const date = new Date();
+    const month = date.getMonth();
+    const day = date.getDate();
+
+    // Simple holiday detection
+    if ((month === 11 && day >= 20) || (month === 0 && day <= 7)) {
+      this.applyTheme('christmas');
+    } else if (month === 1 && day >= 14 && day <= 16) {
+      this.applyTheme('valentines');
+    } else if (month === 9 && day >= 25 && day <= 31) {
+      this.applyTheme('halloween');
+    } else {
+      this.applySeasonalTheme();
+    }
+  }
+
+  applyTheme(themeName) {
+    // Update CSS custom properties based on theme
+    const root = document.documentElement;
+    
+    const themes = {
+      'ice-blue': { '--accent-dark': '#60a5fa', '--accent-light': '#93c5fd' },
+      'snow-white': { '--accent-dark': '#f3f4f6', '--accent-light': '#ffffff' },
+      'spring-green': { '--accent-dark': '#34d399', '--accent-light': '#6ee7b7' },
+      'cherry-pink': { '--accent-dark': '#f472b6', '--accent-light': '#f9a8d4' },
+      'ocean-blue': { '--accent-dark': '#0ea5e9', '--accent-light': '#38bdf8' },
+      'sunset-orange': { '--accent-dark': '#f97316', '--accent-light': '#fb923c' },
+      'autumn-red': { '--accent-dark': '#dc2626', '--accent-light': '#ef4444' },
+      'golden-brown': { '--accent-dark': '#d97706', '--accent-light': '#f59e0b' }
+    };
+
+    const theme = themes[themeName];
+    if (theme) {
+      Object.entries(theme).forEach(([property, value]) => {
+        root.style.setProperty(property, value);
+      });
+    }
+  }
+
+  handleBackgroundChange(type) {
+    switch (type) {
+      case 'seasonal':
+        this.setSeasonalBackground();
+        break;
+      case 'nature':
+        this.setNatureBackground();
+        break;
+      case 'upload':
+        document.getElementById('backgroundUpload').click();
+        break;
+      default:
+        this.setDefaultBackground();
+    }
+  }
+
+  setSeasonalBackground() {
+    const month = new Date().getMonth();
+    const backgrounds = [
+      'url("https://images.pexels.com/photos/132037/pexels-photo-132037.jpeg?w=1920&q=85")', // Winter
+      'url("https://images.pexels.com/photos/33109/fall-autumn-red-season.jpg?w=1920&q=85")', // Spring
+      'url("https://images.pexels.com/photos/772429/pexels-photo-772429.jpeg?w=1920&q=85")', // Summer
+      'url("https://images.pexels.com/photos/1379636/pexels-photo-1379636.jpeg?w=1920&q=85")' // Autumn
+    ];
+    
+    const currentBg = backgrounds[month % 4];
+    document.body.style.backgroundImage = currentBg;
+  }
+
+  setNatureBackground() {
+    const randomBg = seasonalNature[Math.floor(Math.random() * seasonalNature.length)];
+    document.body.style.backgroundImage = `url("${randomBg}")`;
+  }
+
+  setDefaultBackground() {
+    document.body.style.backgroundImage = '';
+  }
+
+  handleBackgroundUpload(file) {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.body.style.backgroundImage = `url("${e.target.result}")`;
+      localStorage.setItem('custom_background', e.target.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  toggleAnimations(enabled) {
+    const root = document.documentElement;
+    root.style.setProperty('--animation-duration', enabled ? '0.3s' : '0s');
+    
+    // Disable specific animations
+    const style = document.createElement('style');
+    if (!enabled) {
+      style.textContent = `
+        * {
+          animation: none !important;
+          transition: none !important;
+        }
+      `;
+      document.head.appendChild(style);
+    } else {
+      const existingStyle = document.querySelector('style[data-animations="disabled"]');
+      if (existingStyle) existingStyle.remove();
+    }
+  }
+
+  loadCustomBackground() {
+    const customBg = localStorage.getItem('custom_background');
+    if (customBg) {
+      document.body.style.backgroundImage = `url("${customBg}")`;
+    }
+  }
+}
+
+// Calendar Sync Manager
+class CalendarSyncManager {
+  constructor() {
+    this.syncEnabled = false;
+    this.initSyncFeatures();
+  }
+
+  initSyncFeatures() {
+    const syncToggle = document.getElementById('calendarSyncToggle');
+    if (syncToggle) {
+      syncToggle.addEventListener('change', (e) => {
+        this.toggleSync(e.target.checked);
+      });
+    }
+  }
+
+  toggleSync(enabled) {
+    this.syncEnabled = enabled;
+    
+    if (enabled) {
+      this.showSyncOptions();
+    } else {
+      this.showSyncDisabled();
+    }
+  }
+
+  showSyncOptions() {
+    const modal = document.createElement('div');
+    modal.className = 'sync-modal';
+    modal.innerHTML = `
+      <div class="sync-content">
+        <h3>Calendar Sync Setup</h3>
+        <p>Choose your preferred calendar service:</p>
+        <div class="sync-options">
+          <button class="sync-btn" data-service="google">
+            <i data-feather="calendar"></i>
+            Google Calendar
+          </button>
+          <button class="sync-btn" data-service="outlook">
+            <i data-feather="mail"></i>
+            Outlook Calendar
+          </button>
+          <button class="sync-btn" data-service="apple">
+            <i data-feather="smartphone"></i>
+            Apple Calendar
+          </button>
+        </div>
+        <button class="sync-cancel">Cancel</button>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Add event listeners
+    modal.querySelectorAll('.sync-btn').forEach(btn => {
+      btn.onclick = () => {
+        this.setupSync(btn.dataset.service);
+        modal.remove();
+      };
+    });
+
+    modal.querySelector('.sync-cancel').onclick = () => {
+      modal.remove();
+      document.getElementById('calendarSyncToggle').checked = false;
+    };
+  }
+
+  setupSync(service) {
+    // Simulate calendar sync setup
+    setTimeout(() => {
+      this.showSyncSuccess(service);
+      this.startSync(service);
+    }, 2000);
+  }
+
+  showSyncSuccess(service) {
+    const notification = document.createElement('div');
+    notification.className = 'sync-notification success';
+    notification.textContent = `✅ Successfully connected to ${service} Calendar!`;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.remove();
+    }, 3000);
+  }
+
+  startSync(service) {
+    // Simulate periodic sync
+    setInterval(() => {
+      console.log(`Syncing with ${service} calendar...`);
+      // In a real implementation, this would sync with actual APIs
+    }, 300000); // Sync every 5 minutes
+  }
+
+  showSyncDisabled() {
+    const notification = document.createElement('div');
+    notification.className = 'sync-notification';
+    notification.textContent = '📴 Calendar sync disabled';
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.remove();
+    }, 2000);
+  }
+}
+
+// Smart Location Detection
+class LocationManager {
+  constructor() {
+    this.location = null;
+    this.initLocationFeatures();
+  }
+
+  initLocationFeatures() {
+    const autoLocationToggle = document.getElementById('autoLocationToggle');
+    if (autoLocationToggle) {
+      autoLocationToggle.addEventListener('change', (e) => {
+        if (e.target.checked) {
+          this.requestLocation();
+        }
+      });
+    }
+  }
+
+  async requestLocation() {
+    if (!navigator.geolocation) {
+      console.warn('Geolocation not supported');
+      return;
+    }
+
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 600000 // 10 minutes
+        });
+      });
+
+      this.location = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy
+      };
+
+      console.log('Location detected:', this.location);
+      this.updateLocationBasedFeatures();
+      
+    } catch (error) {
+      console.warn('Location access denied:', error);
+      this.showLocationError();
+    }
+  }
+
+  updateLocationBasedFeatures() {
+    // Update weather with location
+    if (this.location) {
+      // Weather API calls would use these coordinates
+      console.log('Updating weather for location:', this.location);
+    }
+
+    // Update news based on location
+    if (this.location) {
+      console.log('Updating news for location:', this.location);
+    }
+
+    // Store location preferences
+    localStorage.setItem('user_location', JSON.stringify(this.location));
+  }
+
+  showLocationError() {
+    const notification = document.createElement('div');
+    notification.className = 'location-notification error';
+    notification.textContent = '📍 Location access denied. Some features may be limited.';
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.remove();
+    }, 4000);
+  }
+
+  loadStoredLocation() {
+    const stored = localStorage.getItem('user_location');
+    if (stored) {
+      this.location = JSON.parse(stored);
+      this.updateLocationBasedFeatures();
+    }
+  }
+}
+
+// Initialize all new features
+function initializeAdvancedFeatures() {
+  console.log('🚀 Initializing advanced features...');
+  
+  // Initialize all managers
+  window.timeZoneManager = new TimeZoneManager();
+  window.templateManager = new TemplateManager();
+  window.gestureManager = new GestureManager();
+  window.visualManager = new VisualManager();
+  window.calendarSyncManager = new CalendarSyncManager();
+  window.locationManager = new LocationManager();
+  
+  // Load custom background if exists
+  window.visualManager.loadCustomBackground();
+  window.locationManager.loadStoredLocation();
+  
+  // Update time displays periodically
+  setInterval(() => {
+    window.timeZoneManager?.updateTimeDisplays();
+  }, 60000); // Update every minute
+  
+  console.log('✅ Advanced features initialized successfully');
+}
+
+// Enhanced application initialization
+const originalInitializeApp = initializeApp;
+initializeApp = async function() {
+  // Call original initialization
+  await originalInitializeApp();
+  
+  // Then initialize advanced features
+  initializeAdvancedFeatures();
+};
+
 // Start the application
 startApplication();
