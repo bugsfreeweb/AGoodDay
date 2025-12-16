@@ -396,6 +396,39 @@
     box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
   }
 
+  /* Fix select option visibility in dark theme */
+  select option {
+    background: var(--card-dark) !important;
+    color: var(--text-dark) !important;
+    padding: 0.5rem;
+  }
+
+  select optgroup {
+    background: var(--surface-card) !important;
+    color: var(--text-secondary) !important;
+  }
+
+  /* Enhanced select styling for better visibility */
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='m2 0-2 2h4zm0 5 2-2h-4z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 0.65rem auto;
+    padding-right: 2.5rem;
+  }
+
+  /* Better visibility for settings dropdowns */
+  .settings-section select {
+    background: var(--surface-elevated);
+    border: 2px solid var(--border-light);
+  }
+
+  .settings-section select:hover {
+    background: var(--glass-bg);
+    border-color: var(--accent-dark);
+  }
+
   /* Professional Navigation */
   .nav-btn { 
     position: fixed; 

@@ -5,6 +5,7 @@ const urlsToCache = [
   './index.html',
   './css/styles.css',
   './js/app.js',
+  './manifest.json',
   './assets/agoodday.png',
   'https://unpkg.com/feather-icons',
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap'

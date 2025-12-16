@@ -802,6 +802,56 @@ async function fallbackLocation() {
   await fetchNewsByCountry('us');
 }
 
+// Load weather for a specific date
+async function loadWeatherForDate(day, month, year) {
+  try {
+    // Try to get user's current location for weather
+    if (dataManager.preferences.autoLocation && navigator.geolocation) {
+      const pos = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          timeout: 5000,
+          maximumAge: 300000
+        });
+      });
+      
+      await fetchWeather(pos.coords.latitude, pos.coords.longitude);
+      await fetchNewsByCountry(userCountryCode || 'us');
+    } else {
+      // Fallback to a default location (New York)
+      await fetchWeather(40.7128, -74.0060);
+      await fetchNewsByCountry('us');
+    }
+  } catch (error) {
+    console.warn('Weather loading failed:', error);
+    // Show error state
+    document.getElementById("weather").innerHTML = `
+      <div class="weather-card-professional">
+        <div class="weather-header">
+          <span class="weather-title">Weather</span>
+        </div>
+        <div class="weather-content">
+          <div class="weather-main">
+            <span class="weather-icon">❌</span>
+            <div class="weather-temp">
+              <span class="temp-value">--</span>
+              <span class="temp-unit">°</span>
+            </div>
+          </div>
+          <div class="weather-info">
+            <div class="location">Unable to load</div>
+            <div class="condition">Location access denied</div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.getElementById("news").innerHTML = `
+      <a href="https://news.google.com" target="_blank" class="news-link">
+        📰 Today's Top News
+      </a>
+    `;
+  }
+}
+
 // Enhanced Professional Weather Function
 async function fetchWeather(lat, lon) {
   try {
@@ -943,7 +993,8 @@ async function showDetail(day, month, year) {
   overlay.style.display = 'flex';
   setTimeout(() => overlay.style.opacity = '1', 100);
   
-  await getLocationAndLoad();
+  // Load weather for the selected date's location
+  await loadWeatherForDate(day, month, year);
   
   // Show events for this date in the Special Day section
   const events = eventManager.getEventsForDate(date);
