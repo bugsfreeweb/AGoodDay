@@ -78,10 +78,10 @@ A professional-grade Progressive Web Application (PWA) calendar with advanced fe
 ## 📸 Screenshots
 
 ### Desktop View
-![Desktop Calendar](screenshots/desktop-calendar.png)
+![Desktop Calendar](assets/desktop-calendar.png)
 
 ### Mobile View
-![Mobile Calendar](screenshots/mobile-calendar.png)
+![Mobile Calendar](assets/mobile-calendar.png)
 
 
 ## 🛠️ Installation
