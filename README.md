@@ -17,7 +17,14 @@ A breathtakingly beautiful, fully interactive web calendar with real-time weathe
 - **Real-time Weather** – Location-based (falls back to Delhi if denied)  
 - **Top News Headline** – From your country, powered by NewsAPI  
 - **Fully Responsive** – Perfect on tablet & desktop (Mobile is not perfect for this UI)
-- **Pure HTML + CSS + Vanilla JS** – No frameworks, no build tools  
+- **Pure HTML + CSS + Vanilla JS** – No frameworks, no build tools
+
+## 📊 Project Stats
+
+![GitHub stars](https://img.shields.io/github/stars/bugsfreeweb/AGoodDay)
+![GitHub forks](https://img.shields.io/github/forks/bugsfreeweb/AGoodDay)
+![GitHub issues](https://img.shields.io/github/issues/bugsfreeweb/AGoodDay)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/bugsfreeweb/AGoodDay)
 
 ## Tech Stack
 
